@@ -4,8 +4,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
@@ -73,6 +74,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
     private SharedPreferences pm;
     private ImageLoader mImageLoader;
     private ListView mListView;
+    private Toolbar toolbar;
     private MenuItem mMenuItemReaderSense, mMenuItemReaderType;
     private int readerType;
     private int chapters_order; // 0 = db_desc | 1 = chapter number | 2 = chapter number asc | 3 = title | 4 = title asc | 5 = db_asc
@@ -93,7 +95,9 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
         setHasOptionsMenu(true);
         setRetainInstance(true);
         mMangaId = getArguments().getInt(MainFragment.MANGA_ID, -1);
-        return inflater.inflate(R.layout.fragment_manga, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_manga, container, false);
+        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        return rootView;
     }
 
     @Override
@@ -114,6 +118,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
             mListView = (ListView) getView().findViewById(R.id.list);
             swipeReLayout = (SwipeRefreshLayout) getView().findViewById(R.id.str);
         }
+
         mImageLoader = new ImageLoader(getActivity());
         final int[] colors = ThemeColors.getColors(pm);
         swipeReLayout.setColorSchemeColors(colors[0], colors[1]);
@@ -141,7 +146,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
         mInfo = new ControlInfoNoScroll(getActivity());
         mListView.addHeaderView(mInfo);
         mInfo.setColor(MainActivity.darkTheme, colors[0]);
-        mInfo.enableTitleCopy(getActivity(),mManga.getTitle());
+        mInfo.enableTitleCopy(getActivity(), mManga.getTitle());
         ChapterAdapter.setColor(MainActivity.darkTheme, colors[1], colors[0]);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -578,8 +583,23 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_manga, menu);
+    public void onCreateOptionsMenu(Menu menu_, MenuInflater inflater) {
+        Menu menu;
+        if (toolbar == null) {
+            inflater.inflate(R.menu.menu_manga, menu_);
+            menu = menu_;
+        } else {
+            toolbar.inflateMenu(R.menu.menu_manga);
+            toolbar.setBackgroundColor(MainActivity.colors[0]);
+            menu = toolbar.getMenu();
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return onOptionsItemSelected(item);
+                }
+            });
+        }
+
         mMenuItemReaderSense = menu.findItem(R.id.action_sentido);
         mMenuItemReaderType = menu.findItem(R.id.action_reader);
         int sortList[] = {
@@ -787,7 +807,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
         @Override
         protected Void doInBackground(Void... params) {
             String condition = "1";
-            if(hide_read) {
+            if (hide_read) {
                 condition = Database.COL_CAP_STATE + " != 1";
             }
             chapters = Database.getChapters(getActivity(), mMangaId, condition);
