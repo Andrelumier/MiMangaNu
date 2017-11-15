@@ -18,7 +18,7 @@ import ar.rulosoft.mimanganu.componentes.ServerFilter;
  */
 class MangaEden extends ServerBase {
 
-    protected static final String HOST = "http://www.mangaeden.com/";
+    protected static final String HOST = "http://www.mangaeden.com";
 
     protected int[] fltGenre = {
             R.string.flt_tag_action,
@@ -192,8 +192,7 @@ class MangaEden extends ServerBase {
             Pattern pattern = Pattern.compile("<tr.+?href=\"(/en/en-manga/.+?)\".+?>(.+?)</a", Pattern.DOTALL);
             Matcher matcher = pattern.matcher(source);
             while (matcher.find()) {
-                Chapter chapter = new Chapter(matcher.group(2).replaceAll("Chapter", " Ch "), HOST + matcher.group(1));
-                chapter.addChapterFirst(manga);
+                manga.addChapterFirst(new Chapter(matcher.group(2).replaceAll("Chapter", " Ch "), HOST + matcher.group(1)));
             }
         }
     }
@@ -211,7 +210,12 @@ class MangaEden extends ServerBase {
             ArrayList<String> images = getAllMatch("fs\":\\s*\"(.+?)\"", source);
 
             if (images.isEmpty()) {
-                throw new Exception(context.getString(R.string.server_failed_loading_chapter));
+                // if the Manga was licensed, no pages are returned as well
+                getFirstMatch(
+                        "We are sorry but this manga has been licensed in your country",
+                        source,
+                        context.getString(R.string.server_failed_loading_chapter));
+                throw new Exception(context.getString(R.string.server_manga_is_licensed));
             }
             chapter.setExtra(TextUtils.join("|", images));
             chapter.setPages(images.size());

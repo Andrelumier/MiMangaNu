@@ -33,8 +33,8 @@
     <string name="configuraciones">Einstellungen</string>
     <string name="datosde">Details</string>
     <string name="demaciados_errores">Zu viele Fehler (Download angehalten \n Mögliche Ursachen: \n * Verbindungsfehler \n Ein serverseitiger Fehler \n Ein fehlerhafter Upload, usw. \nBitte später nochmal versuchen.)</string>
-    <string name="descarga_no_leidos">Lade ungelesene</string>
-    <string name="descargarestantes">Lade fehlende</string>
+    <string name="descarga_no_leidos">Lade ungelesene Kapitel</string>
+    <string name="descargarestantes">Lade fehlende Kapitel</string>
     <string name="descargas">Downloads</string>
     <string name="direcctorio_subtitle">Ordner für Downloads festlegen (bereits vorhandene Inhalte müssen manuell in den neuen Ordner verschoben werden, danach die App und ggf. das Gerät neu starten).</string>
     <string name="directorio_title">Ordner auswählen</string>
@@ -47,7 +47,7 @@
     <string name="paused">(Angehalten)</string>
     <string name="esconder_de_galeria_subtitle">Heruntergeladene Bilder nicht in der Galerie anzeigen.</string>
     <string name="escondergaleria">Bilder verbergen</string>
-    <string name="hide_read">Verstecke gelesene</string>
+    <string name="hide_read">Gelesene ausblenden</string>
     <string name="estado">Status</string>
     <string name="filtrar">Filter</string>
     <string name="finalizado">Abgeschlossen</string>
@@ -117,7 +117,7 @@
     <string name="color_reader">Reader Farbe</string>
     <string name="color_reader_sub">Farbe im Reader Modus</string>
     <string name="read_next">Nächstes Kapitel öffnen?</string>
-    <string name="last_chapter">Dies ist zurzeit das letzte Kapitel</string>
+    <string name="last_chapter">Dies ist gegenwärtig das letzte Kapitel.</string>
     <string name="genre">Genre</string>
     <string name="connection_settings">Verbindungseinstellungen</string>
     <string name="connection_timeout_title">Zeitüberschreitung der Verbindung</string>
@@ -140,7 +140,7 @@
     <string name="paged_reader">Seitenleser</string>
     <string name="error_downloading_image">Fehler beim Laden des Bildes</string>
     <string name="used_space">Speicherbedarf der Manga</string>
-    <string name="delete_on_chapter_change">Bilder löschen?</string>
+    <string name="delete_on_chapter_change">Kapitelbilder löschen?</string>
     <string name="mgs_update_found">Neue Kapitel wurden gefunden (%s)</string>
     <string name="close">Schließen</string>
     <string name="retry">Wiederholen</string>
@@ -456,4 +456,10 @@
     <string name="viewcomic_down">viewcomic.com und view-comic.com sind nicht erreichbar.</string>
     <string name="viewcomic_host0_down_redirect">viewcomic.com ist nicht erreichbar - leite um zu view-comic.com</string>
     <string name="viewcomic_host1_down_redirect">view-comic.com ist nicht erreichbar - leite um zu viewcomic.com</string>
+    <string name="back">Zurück</string>
+    <string name="finished_reading">%s gelesen</string>
+    <string name="delete_on_manga_finished">Bilder des Manga löschen?</string>
+    <string name="server_failed_locate_manga_name">Manga Name konnte nicht extrahiert werden.</string>
+    <string name="server_failed_locate_manga_url">Manga URL konnte nicht extrahiert werden.</string>
+    <string name="server_manga_is_licensed">Der Manga ist lizenziert und nicht mehr zum Download verfügbar.</string>
 </resources>

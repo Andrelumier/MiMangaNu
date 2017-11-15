@@ -24,7 +24,7 @@ import okhttp3.RequestBody;
  */
 class Kumanga extends ServerBase {
 
-    private static final String HOST = "http://www.kumanga.com/";
+    private static final String HOST = "http://www.kumanga.com";
 
     private static final int[] fltGenre = {
             R.string.flt_tag_action, //Acción
@@ -201,9 +201,9 @@ class Kumanga extends ServerBase {
         JSONArray jsonArray = json.getJSONArray("contents");
         for (int i = 0, j = jsonArray.length(); i < j; i++) {
             JSONObject object = (JSONObject) jsonArray.get(i);
-            Manga m = new Manga(KUMANGA, object.getString("name"),
+            Manga m = new Manga(getServerID(), object.getString("name"),
                     HOST + "/manga/" + object.getInt("id") + "/", false);
-            m.setImages(HOST + "kumathumb.php?src=" + object.getInt("id"));
+            m.setImages(HOST + "/kumathumb.php?src=" + object.getInt("id"));
             mangas.add(m);
         }
         return mangas;
@@ -255,8 +255,7 @@ class Kumanga extends ServerBase {
             Pattern pattern = Pattern.compile("<h4 class=\"title\">\\s*<a href=\"(manga[^\"]+).+?>(.+?)</i>", Pattern.DOTALL);
             Matcher matcher = pattern.matcher(data);
             while (matcher.find()) {
-                Chapter chapter = new Chapter(matcher.group(2), HOST + matcher.group(1));
-                chapter.addChapterFirst(manga);
+                manga.addChapterFirst(new Chapter(matcher.group(2), HOST + "/" + matcher.group(1)));
             }
         }
     }
@@ -264,7 +263,7 @@ class Kumanga extends ServerBase {
     @Override
     public String getImageFrom(Chapter chapter, int page) throws Exception {
         assert chapter.getExtra() != null;
-        return "http://img.kumanga.com/manga/" + chapter.getExtra() + "/" + page + ".jpg";
+        return chapter.getExtra().replaceAll("\\{.+?\\}", "" + page);
     }
 
     @Override
@@ -275,7 +274,7 @@ class Kumanga extends ServerBase {
                     "<select class=\"pageselector.+?>(\\d+)</option>[\\s]*</select>", data,
                     context.getString(R.string.server_failed_loading_page_count));
             chapter.setExtra(getFirstMatch(
-                    "/c/(.+)", chapter.getPath(),
+                    "'pageFormat':'(.+?)'", data,
                     context.getString(R.string.server_failed_loading_chapter)));
             chapter.setPages(Integer.parseInt(pages));
         }

@@ -273,28 +273,30 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
 
     public void loadInfo(Manga manga) {
         if (mInfo != null && manga != null && isAdded()) {
-            String infoExtra = "";
-            if (manga.isFinished()) {
-                infoExtra = infoExtra +
-                        getResources().getString(R.string.finalizado);
-            } else {
-                infoExtra = infoExtra + getResources().getString(R.string.en_progreso);
-            }
-            mInfo.setStatus(infoExtra);
-            mInfo.setSynopsis(manga.getSynopsis());
+            mInfo.setStatus(manga.isFinished()?getResources().getString(R.string.finalizado):getResources().getString(R.string.en_progreso));
             mInfo.setServer(ServerBase.getServer(manga.getServerId(), getContext()).getServerName());
-            if (manga.getAuthor().length() > 1) {
+
+            if (manga.getSynopsis() != null) {
+                mInfo.setSynopsis(manga.getSynopsis());
+            }
+            else {
+                mInfo.setSynopsis(getResources().getString(R.string.nodisponible));
+            }
+            if (manga.getAuthor() != null) {
                 mInfo.setAuthor(manga.getAuthor());
             } else {
                 mInfo.setAuthor(getResources().getString(R.string.nodisponible));
             }
-            if (manga.getGenre().length() > 4) {
+            if (manga.getGenre() != null) {
                 mInfo.setGenre(manga.getGenre());
             } else {
                 mInfo.setGenre(getResources().getString(R.string.nodisponible));
             }
-            if (manga.getLastUpdate().length() > 3) {
+            if (manga.getLastUpdate()!= null) {
                 mInfo.setLastUpdate(manga.getLastUpdate());
+            }
+            else {
+                mInfo.setLastUpdate(getResources().getString(R.string.nodisponible));
             }
             mImageLoader.displayImg(manga.getImages(), mInfo);
         }

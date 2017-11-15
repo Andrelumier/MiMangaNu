@@ -13,7 +13,7 @@ import ar.rulosoft.mimanganu.componentes.ServerFilter;
 import ar.rulosoft.mimanganu.utils.Util;
 
 class MangaPanda extends ServerBase {
-    private static String HOST = "http://www.mangapanda.com";
+    private String HOST = "http://www.mangapanda.com";
 
     private static final String PATTERN_SERIE =
             "<li><a href=\"([^\"]+)\">([^<]+)";
@@ -107,8 +107,8 @@ class MangaPanda extends ServerBase {
         setServerID(MANGAPANDA);
     }
 
-    void SetHost(String new_host) {
-        HOST = new_host;
+    void setHost(String host) {
+        HOST = host;
     }
 
     @Override
@@ -168,9 +168,10 @@ class MangaPanda extends ServerBase {
                         if (m2.find()) web = m2.group(1) + "/" + m2.group(2);
                     }
                     String chName = m1.group(2);
-                    if (!m1.group(3).trim().isEmpty())
+                    if (!m1.group(3).trim().isEmpty()) {
                         chName += " :" + m1.group(3);
-                    manga.addChapter(new Chapter(chName, HOST + web));
+                    }
+                    manga.addChapterLast(new Chapter(chName, HOST + web));
                 }
             }
             // Summary
@@ -181,6 +182,10 @@ class MangaPanda extends ServerBase {
             manga.setFinished(data.contains("<td>Completed</td>"));
             // Genre
             manga.setGenre(getFirstMatchDefault("Genre:</td>[^<]*<td>(.+?)</td>", data, context.getString(R.string.nodisponible)).replace("a> <a", "a>, <a"));
+            assert manga.getGenre() != null;
+            if(manga.getGenre().isEmpty()) {
+                manga.setGenre(context.getString(R.string.nodisponible));
+            }
             // Author
             manga.setAuthor(getFirstMatchDefault("Author:</td>[^<]*<td>([^<]+)", data, context.getString(R.string.nodisponible)));
         }

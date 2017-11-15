@@ -10,6 +10,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="26" />
+
     <application
         android:name=".MiMangaNuApplication"
         android:allowBackup="true"
@@ -38,11 +42,9 @@
             android:name=".SplashActivity"
             android:label="@string/app_name"
             android:launchMode="standard"
-            android:theme="@style/SplashTheme"
-            android:uiOptions="splitActionBarWhenNarrow">
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -57,7 +59,9 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".services.AlarmReceiver">
-            <action android:name="ar.rulosoft.CHECK_UPDATES" />
+            <intent-filter>
+                <action android:name="ar.rulosoft.CHECK_UPDATES" />
+            </intent-filter>
         </receiver>
         <receiver android:name=".services.BootAndUpdateReceiver">
             <intent-filter>

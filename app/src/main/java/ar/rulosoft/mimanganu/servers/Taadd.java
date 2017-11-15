@@ -221,8 +221,7 @@ class Taadd extends ServerBase {
             Pattern p = Pattern.compile("href=\"(/chapter/[^-\"]+?)\">(.+?)</a>", Pattern.DOTALL);
             Matcher matcher = p.matcher(source);
             while (matcher.find()) {
-                Chapter chapter = new Chapter(matcher.group(2), HOST + matcher.group(1));
-                chapter.addChapterFirst(manga);
+                manga.addChapterFirst(new Chapter(matcher.group(2), HOST + matcher.group(1)));
             }
         }
     }
@@ -242,7 +241,7 @@ class Taadd extends ServerBase {
         if(chapter.getPages() == 0) {
             String source = getNavigatorAndFlushParameters().get(chapter.getPath());
             String pageNumber = getFirstMatch(
-                    "\">(\\d+)</option>[\\s]*</select>", source,
+                    ">(\\d+)</option>\\s*</select>", source,
                     context.getString(R.string.server_failed_loading_page_count));
             chapter.setPages(Integer.parseInt(pageNumber));
         }

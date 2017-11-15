@@ -94,8 +94,7 @@ class MangaKawaii extends ServerBase {
             ArrayList<String> tmpChapterList = new ArrayList<>();
             while (matcher.find()) {
                 if(!tmpChapterList.contains(matcher.group(1))) {
-                    Chapter chapter = new Chapter(matcher.group(2), matcher.group(1));
-                    chapter.addChapterFirst(manga);
+                    manga.addChapterFirst(new Chapter(matcher.group(2), matcher.group(1)));
                     tmpChapterList.add(matcher.group(1));
                 }
             }
@@ -135,8 +134,8 @@ class MangaKawaii extends ServerBase {
         ArrayList<Manga> mangas = new ArrayList<>();
         while (matcher.find()) {
             Manga m = new Manga(getServerID(),
-                    getFirstMatchDefault("alt='([^']+)", matcher.group(1), ""),
-                    getFirstMatchDefault("href=\"([^\"]+)", matcher.group(1), ""),
+                    getFirstMatch("alt='([^']+)", matcher.group(1), context.getString(R.string.server_failed_locate_manga_name)),
+                    getFirstMatch("href=\"([^\"]+)", matcher.group(1), context.getString(R.string.server_failed_locate_manga_url)),
                     false
             );
             m.setImages(getFirstMatchDefault("src='([^\']+)", matcher.group(1), ""));
