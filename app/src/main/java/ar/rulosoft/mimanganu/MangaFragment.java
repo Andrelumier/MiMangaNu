@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,10 +14,14 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -600,6 +603,46 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
                     return onOptionsItemSelected(item);
                 }
             });
+            // Extract from https://stackoverflow.com/questions/26489079/evenly-spaced-menu-items-on-toolbar inner_class7 response
+            // Use Display metrics to get Screen Dimensions
+            Display display = getActivity().getWindowManager().getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+
+            // Add 10 spacing on either side of the toolbar
+            toolbar.setContentInsetsAbsolute(10, 10);
+
+            // Get the ChildCount of your Toolbar, this should only be 1
+            int childCount = toolbar.getChildCount();
+            // Get the Screen Width in pixels
+            int screenWidth = metrics.widthPixels;
+
+            // Create the Toolbar Params based on the screenWidth
+            Toolbar.LayoutParams toolbarParams = new Toolbar.LayoutParams(screenWidth, Toolbar.LayoutParams.WRAP_CONTENT);
+
+            // Loop through the child Items
+            for (int i = 0; i < childCount; i++) {
+                // Get the item at the current index
+                View childView = toolbar.getChildAt(i);
+                // If its a ViewGroup
+                if (childView instanceof ViewGroup) {
+                    // Set its layout params
+                    childView.setLayoutParams(toolbarParams);
+                    // Get the child count of this view group, and compute the item widths based on this count & screen size
+                    int innerChildCount = ((ViewGroup) childView).getChildCount();
+                    int itemWidth = (screenWidth / innerChildCount);
+                    // Create layout params for the ActionMenuView
+                    ActionMenuView.LayoutParams params = new ActionMenuView.LayoutParams(itemWidth, Toolbar.LayoutParams.WRAP_CONTENT);
+                    // Loop through the children
+                    for (int j = 0; j < innerChildCount; j++) {
+                        View grandChild = ((ViewGroup) childView).getChildAt(j);
+                        if (grandChild instanceof ActionMenuItemView) {
+                            // set the layout parameters on each View
+                            grandChild.setLayoutParams(params);
+                        }
+                    }
+                }
+            }
         }
 
         mMenuItemReaderSense = menu.findItem(R.id.action_sentido);
