@@ -14,9 +14,14 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -72,6 +77,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
     private SharedPreferences pm;
     private ImageLoader mImageLoader;
     private ListView mListView;
+    private Toolbar toolbar;
     private MenuItem mMenuItemReaderSense, mMenuItemReaderType;
     private int readerType;
     private int chapters_order; // 0 = db_desc | 1 = chapter number | 2 = chapter number asc | 3 = title | 4 = title asc | 5 = db_asc
@@ -92,7 +98,9 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
         setHasOptionsMenu(true);
         setRetainInstance(true);
         mMangaId = getArguments().getInt(MainFragment.MANGA_ID, -1);
-        return inflater.inflate(R.layout.fragment_manga, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_manga, container, false);
+        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        return rootView;
     }
 
     @Override
@@ -113,6 +121,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
             mListView = (ListView) getView().findViewById(R.id.list);
             swipeReLayout = (SwipeRefreshLayout) getView().findViewById(R.id.str);
         }
+
         mImageLoader = new ImageLoader(getActivity());
         final int[] colors = ThemeColors.getColors(pm);
         swipeReLayout.setColorSchemeColors(colors[0], colors[1]);
@@ -140,7 +149,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
         mInfo = new ControlInfoNoScroll(getActivity());
         mListView.addHeaderView(mInfo);
         mInfo.setColor(MainActivity.darkTheme, colors[0]);
-        mInfo.enableTitleCopy(getActivity(),mManga.getTitle());
+        mInfo.enableTitleCopy(getActivity(), mManga.getTitle());
         ChapterAdapter.setColor(MainActivity.darkTheme, colors[1], colors[0]);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -579,8 +588,63 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_manga, menu);
+    public void onCreateOptionsMenu(Menu menu_, MenuInflater inflater) {
+        Menu menu;
+        if (toolbar == null) {
+            inflater.inflate(R.menu.menu_manga, menu_);
+            menu = menu_;
+        } else {
+            toolbar.inflateMenu(R.menu.menu_manga);
+            toolbar.setBackgroundColor(MainActivity.colors[0]);
+            menu = toolbar.getMenu();
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return onOptionsItemSelected(item);
+                }
+            });
+            // Extract from https://stackoverflow.com/questions/26489079/evenly-spaced-menu-items-on-toolbar inner_class7 response
+            // Use Display metrics to get Screen Dimensions
+            Display display = getActivity().getWindowManager().getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+
+            // Add 10 spacing on either side of the toolbar
+            toolbar.setContentInsetsAbsolute(10, 10);
+
+            // Get the ChildCount of your Toolbar, this should only be 1
+            int childCount = toolbar.getChildCount();
+            // Get the Screen Width in pixels
+            int screenWidth = metrics.widthPixels;
+
+            // Create the Toolbar Params based on the screenWidth
+            Toolbar.LayoutParams toolbarParams = new Toolbar.LayoutParams(screenWidth, Toolbar.LayoutParams.WRAP_CONTENT);
+
+            // Loop through the child Items
+            for (int i = 0; i < childCount; i++) {
+                // Get the item at the current index
+                View childView = toolbar.getChildAt(i);
+                // If its a ViewGroup
+                if (childView instanceof ViewGroup) {
+                    // Set its layout params
+                    childView.setLayoutParams(toolbarParams);
+                    // Get the child count of this view group, and compute the item widths based on this count & screen size
+                    int innerChildCount = ((ViewGroup) childView).getChildCount();
+                    int itemWidth = (screenWidth / innerChildCount);
+                    // Create layout params for the ActionMenuView
+                    ActionMenuView.LayoutParams params = new ActionMenuView.LayoutParams(itemWidth, Toolbar.LayoutParams.WRAP_CONTENT);
+                    // Loop through the children
+                    for (int j = 0; j < innerChildCount; j++) {
+                        View grandChild = ((ViewGroup) childView).getChildAt(j);
+                        if (grandChild instanceof ActionMenuItemView) {
+                            // set the layout parameters on each View
+                            grandChild.setLayoutParams(params);
+                        }
+                    }
+                }
+            }
+        }
+
         mMenuItemReaderSense = menu.findItem(R.id.action_sentido);
         mMenuItemReaderType = menu.findItem(R.id.action_reader);
         int sortList[] = {
@@ -788,7 +852,7 @@ public class MangaFragment extends Fragment implements MainActivity.OnKeyUpListe
         @Override
         protected Void doInBackground(Void... params) {
             String condition = "1";
-            if(hide_read) {
+            if (hide_read) {
                 condition = Database.COL_CAP_STATE + " != 1";
             }
             chapters = Database.getChapters(getActivity(), mMangaId, condition);
