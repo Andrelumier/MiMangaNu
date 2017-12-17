@@ -19,11 +19,16 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -292,6 +297,49 @@ public class Util {
                     Log.e("Util", "Failed to deliver toast! Context was null. Message was: " + toast);
             }
         });
+    }
+
+    public void rearrangeIconInToolbar(Toolbar toolbar, Activity activity){
+        // Extract from https://stackoverflow.com/questions/26489079/evenly-spaced-menu-items-on-toolbar inner_class7 response
+        // Use Display metrics to get Screen Dimensions
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+
+        // Add 10 spacing on either side of the toolbar
+        toolbar.setContentInsetsAbsolute(10, 10);
+
+        // Get the ChildCount of your Toolbar, this should only be 1
+        int childCount = toolbar.getChildCount();
+        // Get the Screen Width in pixels
+        int screenWidth = metrics.widthPixels;
+
+        // Create the Toolbar Params based on the screenWidth
+        Toolbar.LayoutParams toolbarParams = new Toolbar.LayoutParams(screenWidth, Toolbar.LayoutParams.WRAP_CONTENT);
+
+        // Loop through the child Items
+        for (int i = 0; i < childCount; i++) {
+            // Get the item at the current index
+            View childView = toolbar.getChildAt(i);
+            // If its a ViewGroup
+            if (childView instanceof ViewGroup) {
+                // Set its layout params
+                childView.setLayoutParams(toolbarParams);
+                // Get the child count of this view group, and compute the item widths based on this count & screen size
+                int innerChildCount = ((ViewGroup) childView).getChildCount();
+                int itemWidth = (screenWidth / innerChildCount);
+                // Create layout params for the ActionMenuView
+                ActionMenuView.LayoutParams params = new ActionMenuView.LayoutParams(itemWidth, Toolbar.LayoutParams.WRAP_CONTENT);
+                // Loop through the children
+                for (int j = 0; j < innerChildCount; j++) {
+                    View grandChild = ((ViewGroup) childView).getChildAt(j);
+                    if (grandChild instanceof ActionMenuItemView) {
+                        // set the layout parameters on each View
+                        grandChild.setLayoutParams(params);
+                    }
+                }
+            }
+        }
     }
 
     private int getCorrectIcon() {
